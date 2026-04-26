@@ -22,44 +22,54 @@ typedef struct {
 } Flight;
 
 Flight flights[MAX_FLIGHTS];
-int flight_count = 0;
+int flight_count = 3; // Hardcoded for this stage
 
-// Function Prototypes (Stubs)
-void bookFlight() { printf("Booking feature coming soon!\n"); }
-void cancelBooking() { printf("Cancellation feature coming soon!\n"); }
-void modifyBooking() { printf("Modification feature coming soon!\n"); }
-void checkAvailability() { printf("Availability check coming soon!\n"); }
-void displayMenu();
-
-int main() {
-    int choice;
-    while (1) {
-        displayMenu();
-        printf("\nEnter your choice: ");
-        if (scanf("%d", &choice) != 1) {
-            printf("Invalid input!\n");
-            break;
-        }
-
-        switch (choice) {
-            case 1: bookFlight(); break;
-            case 2: cancelBooking(); break;
-            case 3: modifyBooking(); break;
-            case 4: checkAvailability(); break;
-            case 5: exit(0);
-            default: printf("Invalid choice!\n");
-        }
-        printf("\nPress Enter to continue...");
-        getchar(); getchar(); 
+void generatePNR(char *pnr) {
+    const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    for (int i = 0; i < 6; i++) {
+        pnr[i] = charset[rand() % 36];
     }
-    return 0;
+    pnr[6] = '\0';
 }
 
-void displayMenu() {
-    printf("\n=== AIRLINE RESERVATION SYSTEM ===\n");
-    printf("1. Book Flight\n");
-    printf("2. Cancel Booking\n");
-    printf("3. Modify Booking\n");
-    printf("4. Check Seat Availability\n");
-    printf("5. Exit\n");
+void checkAvailability() {
+    printf("\n%-10s %-20s %-15s\n", "Flight No", "Destination", "Available");
+    for (int i = 0; i < flight_count; i++) {
+        printf("%-10s %-20s %-15d\n", flights[i].flight_no, flights[i].destination, flights[i].available_seats);
+    }
+}
+
+void bookFlight() {
+    char fno[10];
+    printf("\nEnter Flight Number: ");
+    scanf("%s", fno);
+
+    int found = -1;
+    for (int i = 0; i < flight_count; i++) {
+        if (strcmp(flights[i].flight_no, fno) == 0) { found = i; break; }
+    }
+
+    if (found == -1 || flights[found].available_seats <= 0) {
+        printf("Flight not available!\n");
+        return;
+    }
+
+    Passenger p;
+    printf("Enter Name: "); scanf("%s", p.name);
+    printf("Enter Age: "); scanf("%d", &p.age);
+    
+    generatePNR(p.pnr);
+    p.seat_no = flights[found].max_seats - flights[found].available_seats + 1;
+    flights[found].available_seats--;
+
+    printf("\nBooking Success! PNR: %s | Seat: %d\n", p.pnr, p.seat_no);
+}
+
+// ... main() and displayMenu() from Stage 1 ...
+// (Add mock data in main for testing)
+int main() {
+    srand(time(NULL));
+    strcpy(flights[0].flight_no, "AI101"); strcpy(flights[0].destination, "Mumbai"); flights[0].max_seats = 50; flights[0].available_seats = 50;
+    strcpy(flights[1].flight_no, "AI202"); strcpy(flights[1].destination, "Delhi"); flights[1].max_seats = 40; flights[1].available_seats = 40;
+    // ... continue as per Stage 1 ...
 }
